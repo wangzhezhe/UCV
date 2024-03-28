@@ -10,8 +10,9 @@
 #include "ucvworklet/ExtractMinMaxOfPoint.hpp"
 #include "ucvworklet/CriticalPointWorkletEpanechAOUF.hpp"
 
-void callCriticalPointWorklet(vtkm::cont::DataSet &vtkmDataSet, int numHistBin)
+void callCriticalPointWorklet(vtkm::cont::DataSet &vtkmDataSet)
 {
+    std::cout << "start callCriticalPointWorklet" << std::endl;
     auto resolveType = [&](auto &concreteArray)
     {
         vtkm::cont::Invoker invoke;
@@ -44,10 +45,10 @@ int main(int argc, char *argv[])
         argc, argv, vtkm::cont::InitializeOptions::DefaultAnyDevice);
     vtkm::cont::Timer timer{initResult.Device};
 
-    if (argc != 8)
+    if (argc != 7)
     {
         //./test_syntheticdata_el_sequence /Users/zw1/Documents/cworkspace/src/UCV/exp_scripts/create_dataset/RawdataPointScalar TestField 300 0.8 1000
-        std::cout << "<executable> <SyntheticDataSuffix> <FieldName> <Dimx> <Dimy> <Dimz> <num of ensembles> <num of bins>" << std::endl;
+        std::cout << "<executable> <SyntheticDataSuffix> <FieldName> <Dimx> <Dimy> <Dimz> <num of ensembles>" << std::endl;
         exit(0);
     }
 
@@ -61,7 +62,6 @@ int main(int argc, char *argv[])
     int dimz = std::stoi(argv[5]);
 
     int numEnsembles = std::stoi(argv[6]);
-    int numHistBin = std::stoi(argv[7]);
 
     const vtkm::Id3 dims(dimx, dimy, dimz);
     vtkm::cont::DataSetBuilderUniform dataSetBuilder;
@@ -118,11 +118,11 @@ int main(int argc, char *argv[])
 
     // using pointNeighborhood worklet to process the data
     timer.Start();
-    callCriticalPointWorklet(vtkmDataSet, numHistBin);
+    callCriticalPointWorklet(vtkmDataSet);
     timer.Stop();
     std::cout << "execution time of callCriticalPointWorklet is " << timer.GetElapsedTime() << std::endl;
 
-    std::string outputFileName = "MinProb_Epanech" + std::to_string(numHistBin) + "_" + std::to_string(dimx) + "_" + std::to_string(dimy) + ".vtk";
+    std::string outputFileName = "MinProb_Epanech_" + std::to_string(dimx) + "_" + std::to_string(dimy) + ".vtk";
     vtkm::io::VTKDataSetWriter writeCross(outputFileName);
     writeCross.WriteDataSet(vtkmDataSet);
 
